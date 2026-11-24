@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="A short daily check-in and a calm space to talk it through. Wellness Companion helps you notice how you're doing.">
+<meta name="theme-color" content="#fbf8f3">
+<title>Wellness Companion | Notice how you're doing</title>
+<style>
+:root{
+  --bg:#fbf8f3;--surface:#ffffff;--ink:#23201c;--muted:#6d655c;
+  --primary:#1f5c58;--on-primary:#ffffff;--primary-soft:#e3efec;
+  --accent:#d97757;--accent-text:#b04e35;--border:#e7e0d4;
+  --shadow:0 18px 40px rgba(35,32,28,.08);--focus:#2f6fd6;--danger:#b42318;
+  --r:20px;--serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#141a1a;--surface:#1c2525;--ink:#f2efe9;--muted:#aab3ad;
+    --primary:#7fc7bd;--on-primary:#0f1717;--primary-soft:#1f3432;
+    --accent:#f08f70;--accent-text:#f08f70;--border:#2b3636;
+    --shadow:0 18px 40px rgba(0,0,0,.35);--focus:#8ab8ff;--danger:#ff9b8f;
+    color-scheme:dark;
+  }
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px;-webkit-text-size-adjust:100%}
+body{margin:0;font:1rem/1.6 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--serif);font-weight:500;line-height:1.15;margin:0;text-wrap:balance}
+a{color:var(--primary)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:6px}
+.wrap{width:min(1080px,calc(100% - 2.5rem));margin-inline:auto}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.skip{position:absolute;left:-999px;top:0;z-index:100;padding:.6rem 1rem;border-radius:0 0 10px 0;background:var(--primary);color:var(--on-primary);text-decoration:none}
+.skip:focus{left:0}
+
+/* Header */
+.top{position:sticky;top:0;z-index:40;background:var(--bg);border-bottom:1px solid transparent;transition:border-color .3s;padding-top:env(safe-area-inset-top,0px)}
+.top.scrolled{border-bottom-color:var(--border)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:68px}
+.brand{display:flex;align-items:center;gap:.55rem;font-weight:700;color:var(--ink);text-decoration:none}
+.brand-dot{width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 22%,transparent)}
+.links{display:flex;align-items:center;gap:1.6rem;list-style:none;margin:0;padding:0}
+.links a:not(.btn){color:var(--muted);text-decoration:none;font-weight:500}
+.links a:not(.btn):hover{color:var(--ink)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:.7rem 1.35rem;border:0;border-radius:12px;background:var(--primary);color:var(--on-primary);font:inherit;font-weight:600;text-decoration:none;cursor:pointer;transition:filter .2s,transform .15s}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:scale(.98)}
+.btn-line{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--border)}
+.btn-line:hover{box-shadow:inset 0 0 0 1.5px var(--primary)}
+.btn-sm{min-height:40px;padding:.5rem 1rem;font-size:.95rem}
+
+/* Hero */
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(2rem,5vw,4rem);align-items:center;padding-block:clamp(2.5rem,8vw,6rem)}
+.kicker{display:inline-flex;align-items:center;gap:.6rem;margin-bottom:1.2rem;font-size:.85rem;font-weight:600;color:var(--primary)}
+.kicker::before{content:"";width:24px;height:2px;background:var(--accent)}
+.hero h1{margin-bottom:1.1rem;font-size:clamp(2.3rem,5.6vw,3.9rem);letter-spacing:-.01em}
+.hero h1 em{font-style:italic;color:var(--accent-text)}
+.lead{max-width:32rem;margin:0 0 2rem;font-size:clamp(1.05rem,2vw,1.2rem);color:var(--muted)}
+.actions{display:flex;flex-wrap:wrap;gap:.75rem}
+.note{margin:1.2rem 0 0;font-size:.9rem;color:var(--muted)}
+
+/* Check-in card */
+.checkin{justify-self:center;width:100%;max-width:440px;padding:clamp(1.25rem,3vw,1.75rem);border:1px solid var(--border);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow)}
+.checkin-top{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;font-size:.85rem;color:var(--muted)}
+.checkin h2{margin:.4rem 0 1.25rem;font-size:1.45rem}
+.mood-value{display:flex;justify-content:space-between;font-weight:600}
+output{color:var(--primary)}
+input[type=range]{width:100%;min-height:44px;margin:.25rem 0 0;accent-color:var(--primary)}
+.scale{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted)}
+.reply{min-height:4.5rem;margin:1.25rem 0;padding:1rem 1.1rem;border-radius:14px;background:var(--primary-soft)}
+.checkin .btn{width:100%}
+
+/* Sections */
+.section{padding-block:clamp(3.5rem,9vw,6rem)}
+.section-alt{background:var(--surface);border-block:1px solid var(--border)}
+.section-title{max-width:36rem;margin-bottom:2.5rem}
+.section-title h2{margin-bottom:.6rem;font-size:clamp(1.9rem,4vw,2.6rem)}
+.section-title p{margin:0;color:var(--muted)}
+.moments{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin:0;padding:0;list-style:none}
+.moment{padding:1.5rem;border:1px solid var(--border);border-radius:var(--r);background:var(--bg)}
+.moment time{font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-text)}
+.moment h3{margin:.5rem 0;font-size:1.4rem}
+.moment p{margin:0;color:var(--muted)}
+
+/* Promises */
+.promises{border-top:1px solid var(--border)}
+.promise{display:grid;grid-template-columns:auto minmax(0,1fr);gap:1.5rem;padding:1.6rem 0;border-bottom:1px solid var(--border)}
+.promise-num{font-family:var(--serif);font-size:1.6rem;color:var(--accent-text)}
+.promise h3{margin-bottom:.35rem;font-size:1.4rem}
+.promise p{max-width:40rem;margin:0;color:var(--muted)}
+
+/* Safety notice */
+.notice{display:grid;gap:.5rem;padding:clamp(1.5rem,4vw,2.25rem);border-radius:var(--r);background:var(--primary-soft)}
+.notice h2{font-size:1.5rem}
+.notice p{margin:0}
+
+/* Signup */
+.signup{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start}
+.signup h2{margin-bottom:.6rem;font-size:clamp(1.9rem,4vw,2.6rem)}
+.signup p{margin:0;color:var(--muted)}
+form{display:grid;gap:.6rem}
+label{font-size:.95rem;font-weight:600}
+input[type=email]{width:100%;min-height:50px;padding:.75rem 1rem;border:1.5px solid var(--border);border-radius:12px;background:var(--surface);color:var(--ink);font:inherit}
+.err{min-height:1.4em;margin:0;font-size:.92rem;color:var(--danger)}
+.ok{font-weight:600;color:var(--primary)}
+
+/* Footer */
+.foot{padding:2rem 0 calc(2rem + env(safe-area-inset-bottom,0px));border-top:1px solid var(--border);font-size:.92rem;color:var(--muted)}
+.foot .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:1rem}
+.foot a{color:var(--muted)}
+
+/* Mobile sticky CTA */
+.sticky{display:none;position:fixed;left:0;right:0;bottom:0;z-index:45;padding:.75rem 1rem calc(.75rem + env(safe-area-inset-bottom,0px));border-top:1px solid var(--border);background:var(--surface);transform:translateY(110%);transition:transform .3s ease}
+.sticky.show{transform:none}
+.sticky .btn{width:100%}
+
+/* Scroll reveal (only when JS runs) */
+.js .rv{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
+.js .rv.in{opacity:1;transform:none}
+
+/* Responsive */
+@media (max-width:860px){
+  .hero{grid-template-columns:1fr}
+  .checkin{justify-self:start;max-width:none}
+  .signup{grid-template-columns:1fr}
+}
+@media (max-width:720px){
+  .links{display:none}
+  .moments{grid-template-columns:1fr}
+  .promise{grid-template-columns:1fr;gap:.35rem}
+  .actions .btn{flex:1 1 100%}
+  .sticky{display:block}
+  .foot{padding-bottom:calc(6rem + env(safe-area-inset-bottom,0px))}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="wrap bar">
+    <a href="#hero" class="brand"><span class="brand-dot" aria-hidden="true"></span>Wellness Companion</a>
+    <ul class="links">
+      <li><a href="#inside">Inside the app</a></li>
+      <li><a href="#promises">Our promises</a></li>
+      <li><a href="#signup" class="btn btn-sm">Get early access</a></li>
+    </ul>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="wrap hero" id="hero">
+    <div>
+      <p class="kicker">A daily companion for how you feel</p>
+      <h1>Notice how you're doing, <em>one quiet minute at a time.</em></h1>
+      <p class="lead">Wellness Companion turns a short daily check-in into a clearer picture of your week, then gives you a calm space to talk through what's on your mind.</p>
+      <div class="actions">
+        <a href="#signup" class="btn">Start your first check-in</a>
+        <a href="#inside" class="btn btn-line">See a day inside</a>
+      </div>
+      <p class="note">Works on phone, tablet, and desktop.</p>
+    </div>
+
+    <div class="checkin rv">
+      <div class="checkin-top"><span>Today</span><span>About one minute</span></div>
+      <h2>How are you feeling right now?</h2>
+      <div class="mood-value"><label for="mood">Mood</label><output id="mood-out" for="mood">Steady</output></div>
+      <input id="mood" type="range" min="1" max="5" step="1" value="3">
+      <div class="scale" aria-hidden="true"><span>Heavy</span><span>Bright</span></div>
+      <div class="reply" id="reply" aria-live="polite"></div>
+      <a href="#signup" class="btn">Continue to check-in</a>
+    </div>
+  </section>
+
+  <section class="section" id="inside">
+    <div class="wrap">
+      <div class="section-title rv">
+        <h2>A day with Wellness Companion</h2>
+        <p>Three small moments, each one a few minutes long.</p>
+      </div>
+      <ol class="moments">
+        <li class="moment rv">
+          <time>Morning</time>
+          <h3>Set a gentle intention</h3>
+          <p>Pick one thing you'd like to feel or focus on before the day gets busy.</p>
+        </li>
+        <li class="moment rv">
+          <time>Midday</time>
+          <h3>Notice what's draining you</h3>
+          <p>A quick check-in helps you spot what's taking more from you than it gives.</p>
+        </li>
+        <li class="moment rv">
+          <time>Evening</time>
+          <h3>Name one good thing</h3>
+          <p>Close the day by noticing what went well, even if it was small.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section section-alt" id="promises">
+    <div class="wrap">
+      <div class="section-title rv">
+        <h2>Built around three promises</h2>
+      </div>
+      <div class="promises">
+        <div class="promise rv">
+          <span class="promise-num">01</span>
+          <div>
+            <h3>Short by design</h3>
+            <p>Five minutes is enough. The goal is consistency, not a perfect journal entry.</p>
+          </div>
+        </div>
+        <div class="promise rv">
+          <span class="promise-num">02</span>
+          <div>
+            <h3>Honest about its limits</h3>
+            <p>Wellness Companion supports reflection. It isn't therapy, diagnosis, or medical care.</p>
+          </div>
+        </div>
+        <div class="promise rv">
+          <span class="promise-num">03</span>
+          <div>
+            <h3>Yours to control</h3>
+            <p>Your check-ins are for you. [Add your real data and privacy commitments here.]</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <aside class="notice rv" aria-labelledby="care-title">
+        <h2 id="care-title">If you need more than a check-in</h2>
+        <p>If you're in crisis or might hurt yourself, contact local emergency services or a crisis helpline right away. A companion can help you reflect, but it can't replace people who can be with you.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section section-alt" id="signup">
+    <div class="wrap signup">
+      <div class="rv">
+        <h2>Get early access</h2>
+        <p>We're inviting early testers now. Join the list and we'll email you when your spot opens.</p>
+      </div>
+      <div class="rv">
+        <form id="signup-form" novalidate>
+          <label for="email">Email address</label>
+          <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required aria-describedby="email-error">
+          <button class="btn" type="submit">Join the early access list</button>
+          <p class="err" id="email-error" role="alert"></p>
+        </form>
+        <p class="ok" id="signup-success" tabindex="-1" hidden>Thanks! You're on the list. We'll be in touch soon.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <span>© <span id="year">2026</span> Wellness Companion</span>
+    <nav aria-label="Footer">
+      <a href="#">Privacy</a> &nbsp;·&nbsp; <a href="#">Terms</a> &nbsp;·&nbsp; <a href="#">Contact</a>
+    </nav>
+  </div>
+</footer>
+
+<div class="sticky" id="sticky-cta">
+  <a href="#signup" class="btn">Start your first check-in</a>
+</div>
+
+<script>
+(function () {
+  document.documentElement.classList.add('js');
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  /* Header border appears once the page scrolls */
+  const header = document.querySelector('.top');
+  const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 8);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* Mood slider */
+  const slider = document.getElementById('mood');
+  const out = document.getElementById('mood-out');
+  const reply = document.getElementById('reply');
+  const labels = ['Heavy', 'Low', 'Steady', 'Good', 'Bright'];
+  const prompts = [
+    "That's a lot to carry. What would make the next hour a little easier?",
+    "Thanks for naming it. What's one small thing you could do for yourself today?",
+    "Steady is a fine place to be. What's on your mind?",
+    "Good to hear. What's helping?",
+    "Lovely. Want to note what made it a bright day?"
+  ];
+  function renderMood() {
+    const i = Number(slider.value) - 1;
+    out.textContent = labels[i];
+    reply.textContent = prompts[i];
+  }
+  slider.addEventListener('input', renderMood);
+  renderMood();
+
+  /* Mobile sticky CTA: show after the hero, hide while the signup form is visible */
+  const bar = document.getElementById('sticky-cta');
+  const hero = document.getElementById('hero');
+  const signup = document.getElementById('signup');
+  let pastHero = false;
+  let atSignup = false;
+  const updateBar = () => bar.classList.toggle('show', pastHero && !atSignup);
+
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(([entry]) => {
+      pastHero = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+      updateBar();
+    }).observe(hero);
+
+    new IntersectionObserver(([entry]) => {
+      atSignup = entry.isIntersecting;
+      updateBar();
+    }, { threshold: 0.2 }).observe(signup);
+  }
+
+  /* Early access form (front-end only; connect your backend below) */
+  const form = document.getElementById('signup-form');
+  const email = document.getElementById('email');
+  const error = document.getElementById('email-error');
+  const success = document.getElementById('signup-success');
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const value = email.value.trim();
+
+    if (!value || !email.checkValidity()) {
+      error.textContent = 'Please enter a valid email address.';
+      email.setAttribute('aria-invalid', 'true');
+      email.focus();
+      return;
+    }
+
+    error.textContent = '';
+    email.removeAttribute('aria-invalid');
+
+    // TODO: send `value` to your backend here (for example, fetch() with POST),
+    // then show success or an error based on the response.
+
+    form.hidden = true;
+    success.hidden = false;
+    success.focus();
+  });
+
+  email.addEventListener('input', () => {
+    if (email.getAttribute('aria-invalid') && email.checkValidity()) {
+      error.textContent = '';
+      email.removeAttribute('aria-invalid');
+    }
+  });
+
+  /* Scroll reveal */
+  const items = document.querySelectorAll('.rv');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if ('IntersectionObserver' in window && !reduceMotion) {
+    const io = new IntersectionObserver((entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    items.forEach((el) => io.observe(el));
+  } else {
+    items.forEach((el) => el.classList.add('in'));
+  }
+})();
+</script>
+</body>
+</html>
